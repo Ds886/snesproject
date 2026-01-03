@@ -29,11 +29,11 @@ main_loop:
 	bne main_loop_default
 	lda LO_COLOR
 	clc
-	adc #2
+	adc #12
 	sta LO_COLOR
 	lda  HI_COLOR
 	clc
-	adc #10
+	adc #15
 	sta HI_COLOR
 	lda #MAX_ANIM
 	sta COUNT_ANIM
@@ -52,7 +52,7 @@ draw:
 	rts
 
 init_vars:
-	lda MAX_ANIM
+	lda #MAX_ANIM
 	sta COUNT_ANIM
 	lda #$1f
 	sta LO_COLOR
