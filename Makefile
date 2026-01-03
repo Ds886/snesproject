@@ -7,6 +7,7 @@ LD65 = ld65
 # Files
 SRC_PREFIX = src
 OUT_PREFIX = out
+PATH_INC = inc
 SRC = ${SRC_PREFIX}/main.asm
 OBJ = ${OUT_PREFIX}/main.o
 OUT = ${OUT_PREFIX}/main.smc
@@ -21,7 +22,7 @@ all: $(OUT)
 
 $(OBJ): $(SRC)
 	mkdir -p "./${OUT_PREFIX}"
-	$(CA65)  -o $(OBJ) $(SRC) --debug-info
+	$(CA65)  -o $(OBJ) -I ./inc $(SRC)  --debug-info
 
 $(OUT): $(OBJ) $(CFG)
 	$(LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile "./${OUT_PREFIX}/main.dbg"
