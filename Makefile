@@ -1,29 +1,29 @@
 # Makefile for assembling and linking a 65816 project
 
 # Tools
-CA65 = ca65
-LD65 = ld65
+BIN_CA65 = ca65
+BIN_LD65 = ld65
 
 # Files
-SRC = main.asm
-OBJ = main.o
-OUT = main.smc
-CFG = memmap.cfg
-
-
-# CPU target
-CPU = 65816
+PATH_SRC = src
+PATH_OUT = out
+PATH_INC = inc
+SRC = ${PATH_SRC}/main.asm
+CFG = ${PATH_SRC}/memmap.cfg
+OBJ = ${PATH_OUT}/main.o
+OUT = ${PATH_OUT}/main.smc
 
 # Rules
 all: $(OUT)
 
 $(OBJ): $(SRC)
-	$(CA65)  -o $(OBJ) $(SRC) --debug-info
+	mkdir -p "./${PATH_OUT}"
+	$(BIN_CA65)  -o $(OBJ) -I ./inc $(SRC)  --debug-info
 
 $(OUT): $(OBJ) $(CFG)
-	$(LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile main.dbg
+	$(BIN_LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile "./${PATH_OUT}/main.dbg"
 
 clean:
-	rm -f $(OBJ) $(OUT)
+	$(RM) -r "./${PATH_OUT}"
 
 .PHONY: all clean
