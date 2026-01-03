@@ -1,3 +1,4 @@
 *.o
 *.smc
 *.dbg
+out

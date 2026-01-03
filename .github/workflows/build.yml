@@ -1,0 +1,30 @@
+name: Build SNES Game
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install cc65
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cc65
+        
+    - name: Build game
+      run: make
+      
+    - name: Upload ROM
+      uses: actions/upload-artifact@v4
+      with:
+        name: snes-game-rom
+        path: |
+          out/*.smc
+          out/*.dbg
+        if-no-files-found: warn
