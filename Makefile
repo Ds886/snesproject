@@ -5,10 +5,12 @@ CA65 = ca65
 LD65 = ld65
 
 # Files
-SRC = main.asm
-OBJ = main.o
-OUT = main.smc
-CFG = memmap.cfg
+SRC_PREFIX = src
+OUT_PREFIX = out
+SRC = ${SRC_PREFIX}/main.asm
+OBJ = ${OUT_PREFIX}/main.o
+OUT = ${OUT_PREFIX}/main.smc
+CFG = ${SRC_PREFIX}/memmap.cfg
 
 
 # CPU target
@@ -18,12 +20,13 @@ CPU = 65816
 all: $(OUT)
 
 $(OBJ): $(SRC)
+	mkdir -p "./${OUT_PREFIX}"
 	$(CA65)  -o $(OBJ) $(SRC) --debug-info
 
 $(OUT): $(OBJ) $(CFG)
-	$(LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile main.dbg
+	$(LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile "./${OUT_PREFIX}/main.dbg"
 
 clean:
-	rm -f $(OBJ) $(OUT)
+	$(RM) -r "./${OUT_PREFIX}"
 
 .PHONY: all clean
