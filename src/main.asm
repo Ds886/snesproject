@@ -6,66 +6,112 @@
 
 .include "header.asm"
 
+.segment "CODE7"
+SpriteData: .incbin "../out/img_16.chr"
+SpriteData_end:
+ColorData: .incbin "../out/img_16.pal"
+ColorData_end:
+
 .segment "BSS"
-COUNT_ANIM: .res 1
-LO_COLOR: .res 1
-HI_COLOR: .res 1
 
 .segment "CODE"
-MAX_ANIM = $0C
 entry:
 	.include "init.asm"
-	; init nmi
-	lda #$80
-	sta NMITIMEN
+	; ; init nmi
+	; lda #$80
+	; sta NMITIMEN
 	cli
 	; Init DBR
 	lda #$00
 	pha
 	plb
 	jsr init_vars
+	jsr init_gfx
 main_loop:
-	lda COUNT_ANIM
-	bne main_loop_default
-	lda LO_COLOR
-	clc
-	adc #12
-	sta LO_COLOR
-	lda  HI_COLOR
-	clc
-	adc #15
-	sta HI_COLOR
-	lda #MAX_ANIM
-	sta COUNT_ANIM
+	nop
 main_loop_default:
-	jsr draw
+	jsr draw_sprite
+	; jsr draw
 	wai
 	jmp main_loop
 
+draw_sprite:
+	lda #$10
+	sta TM
+	lda #$0f
+	sta INIDISP
+	lda #$81
+	sta NMITIMEN
+
+	rts
+
 draw:
-	lda LO_COLOR
+	lda #$ff
 	sta CGDATA
-	lda HI_COLOR
+	lda #$ff
 	sta CGDATA
 	lda #$0f
 	sta INIDISP
 	rts
+; https://georgjz.github.io/snesaa04/
+init_gfx:
+	; VRAM DATA Load
+	stz VMADDL
+	stz VMADDH
+	lda #$80
+	sta BGMODE
+	sta VMAIN
+	ldx #$00
+VRAMLoop:
+	; bitpalne 0,2
+	lda SpriteData, X
+	sta VMDATAL
+	inx
+	; bitpalne 1,3
+	lda SpriteData, X
+	sta VMDATAH
+	cpx # (SpriteData_end - SpriteData)
+	bcc VRAMLoop
+	; Color data load
+	lda #$80
+	sta CGADD
+	ldx #$00
+CGRAMLoop:
+	; Low byte
+	lda ColorData, X
+	sta CGDATA
+	inx
+	lda ColorData, X
+	sta CGDATA
+	inx
+	cpx # (ColorData_end - ColorData)
+	bcc CGRAMLoop
+
+	; OAMDATA
+	stz OAMADDL
+	stz OAMADDH
+	;horiz
+	lda # (256/2 -8)
+	sta OAMDATA
+	;vert
+	lda # (224/2 -8)
+	sta OAMDATA
+	; name
+	lda #$00
+	sta OAMDATA
+	; no flip prio 0 pal 0
+	lda #$00
+	sta OAMDATA
+
+
+
+	rts
 
 init_vars:
-	lda #MAX_ANIM
-	sta COUNT_ANIM
-	lda #$1f
-	sta LO_COLOR
-	lda #$00
-	sta HI_COLOR
 	rts
 
 h_nmi:
 	bit RDNMI
-	lda COUNT_ANIM
-	beq h_nmi_default
-	dec COUNT_ANIM
-h_nmi_default:
 	jmp _rti
 
 _rti:

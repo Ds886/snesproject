@@ -9,27 +9,29 @@ clc
 xce
 cld
 
-rep #$30 ; setAXY16
+setAXY16
 
 ; ZeroCPU registers NMITIMEN through MEMSEL
-stz $4200
-stz $4202
-stz $4204
-stz $4206
-stz $4208
-stz $420A
-stz $420C
+stz NMITIMEN
+stz WRMPYA
+stz WRDIVL
+stz WRDIVB
+stz HTIMEH
+stz VTIMEH
+stz HDMAEN
 
 lda #$0080
 sta INIDISP ; Turn off screen ("forced blank")
 
 ; Zero some registers used for rendering
 stz OAMADDL
+stz OAMADDH
 stz BGMODE
 stz BG1SC
 stz BG3SC
 stz BG12NBA
 stz VMADDL
+stz VMADDH
 stz W12SEL
 stz WH0
 stz WH2
