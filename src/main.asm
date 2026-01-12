@@ -84,15 +84,15 @@ init_gfx:
 init_gfx_cg:
 	stz CGADD ; $2121 cgram address = zero
 	
-	stz $4300 ; transfer mode 0 = 1 register write once
+	stz DMAP0 ; transfer mode 0 = 1 register write once
 	lda #$22  ; $2122
-	sta $4301 ; destination, cgram data
+	sta BBAD0 ; destination, cgram data
 	ldx #.loword(ColorData)
-	stx $4302 ; source
+	stx A1T0L ; source
 	lda #^ColorData
-	sta $4304 ; bank
+	sta A1B0 ; bank
 	ldx #32
-	stx $4305 ; length
+	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0
 	; stz CGADD
@@ -120,16 +120,16 @@ init_gfx_tiles:
 	stx VMADDL ; $2116 set an address in the vram of $0000
 	
 	lda #1
-	sta $4300 ; transfer mode, 2 registers 1 write
+	sta DMAP0 ; transfer mode, 2 registers 1 write
 			  ; $2118 and $2119 are a pair Low/High
 	lda #$18  ; $2118
-	sta $4301 ; destination, vram data
+	sta BBAD0 ; destination, vram data
 	ldx #.loword(CharData)
-	stx $4302 ; source
+	stx A1T0L ; source
 	lda #^CharData
-	sta $4304 ; bank
+	sta A1B0 ; bank
 	ldx #(CharData_end-CharData) 
-	stx $4305 ; length
+	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0
 	; lda #$80
@@ -154,16 +154,16 @@ init_gfx_map:
 	stx VMADDL ; $2116 set an address in the vram of $6000
 	
 	lda #1
-	sta $4300 ; transfer mode, 2 registers 1 write
+	sta DMAP0 ; transfer mode, 2 registers 1 write
 			  ; $2118 and $2119 are a pair Low/High
 	lda #$18  ; $2118
-	sta $4301 ; destination, vram data
+	sta BBAD0 ; destination, vram data
 	ldx #.loword(TileData)
-	stx $4302 ; source
+	stx A1T0L ; source
 	lda #^TileData
-	sta $4304
+	sta A1B0
 	ldx #$700
-	stx $4305 ; length
+	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0	
 	; ldx #$6000
@@ -197,15 +197,15 @@ init_gfx_clear_rem:
 	stx VMADDL
 	lda #$80
 	sta VMAIN
-	stz $4300
+	stz DMAP0
 	lda #$18
-	sta $4301
+	sta BBAD0
 	ldx #.loword(EmptyVRAM)
-	stx $4302
+	stx A1T0L
 	lda #^EmptyVRAM
-	sta $4304
+	sta A1B0
 	ldx #$1E00
-	stx $4305
+	stx DAS0L
 	lda #1
 	sta MDMAEN
 init_gfx2:
