@@ -91,7 +91,7 @@ init_gfx_cg:
 	stx A1T0L ; source
 	lda #^ColorData
 	sta A1B0 ; bank
-	ldx #32
+	ldx #ColorData_size
 	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0
@@ -128,7 +128,7 @@ init_gfx_tiles:
 	stx A1T0L ; source
 	lda #^CharData
 	sta A1B0 ; bank
-	ldx #(CharData_end-CharData) 
+	ldx #CharData_size
 	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0
@@ -162,7 +162,7 @@ init_gfx_map:
 	stx A1T0L ; source
 	lda #^TileData
 	sta A1B0
-	ldx #$700
+	ldx #TileData_size
 	stx DAS0L ; length
 	lda #1
 	sta MDMAEN ; $420b start dma, channel 0	
