@@ -6,6 +6,8 @@ PATH_TOOLS = "../tools"
 BIN_CA65 = ca65
 BIN_LD65 = ld65
 BIN_SUPERFAMICONV=superfamiconv
+BIN_SNESGFXCONV=snesgfxconv
+BIN_GFX4SNES=gfx4snes
 
 # Files
 PATH_SRC = src
@@ -16,25 +18,21 @@ SRC = ${PATH_SRC}/main.asm
 CFG = ${PATH_SRC}/memmap.cfg
 OBJ = ${PATH_OUT}/main.o
 OUT = ${PATH_OUT}/main.smc
-RES = img_16
+RES = img_16 img1_16 img2_16
 
 # Rules
 all: $(OUT)
 
 
-$(PATH_OUT)/%.chr $(PATH_OUT)/%.pal: $(PATH_RES)/%.png
-	mkdir -p "$(PATH_OUT)"
-	$(BIN_SUPERFAMICONV)  \
-		-M snes \
-		-i $< \
-		-t $(PATH_OUT)/$*.chr \
-		-p $(PATH_OUT)/$*.pal \
-		-m $(PATH_OUT)/$*.map \
-		-SDR
-		
-		
+$(PATH_OUT)/res/%.chr $(PATH_OUT)/res/%.pic: $(PATH_RES)/%.png
+	mkdir -p "$(PATH_OUT)/res"
+	cp $< "${PATH_OUT}/res"
+	$(BIN_GFX4SNES)  \
+		-i "${PATH_OUT}/$<" \
+		-X 64 \
+		-Y 64
 
-$(OBJ): $(SRC) $(RES:%=$(PATH_OUT)/%.chr) $(RES:%=$(PATH_OUT)/%.pal)
+$(OBJ): $(SRC) $(RES:%=$(PATH_OUT)/res/%.chr) $(RES:%=$(PATH_OUT)/res/%.pal)
 	mkdir -p "$(PATH_OUT)"
 	$(BIN_CA65) -o $@ -I ./inc $(SRC) --debug-info
 

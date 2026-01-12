@@ -1,110 +1,54 @@
-;init code for SNES
-;much borrowed from Damian Yerrick
-;some borrowed from Oziphantom
+; A very simple SNES init routine
+; For serious use, you probably want to do more than this
+; This is simple and understandable, though
+; Will leave you in A8 XY16 mode
 
-.p816
-.smart
+; Disable interrupts and enable native mode
+sei
+clc
+xce
+cld
 
+setAXY16
 
+; ZeroCPU registers NMITIMEN through MEMSEL
+stz NMITIMEN
+stz WRMPYA
+stz WRDIVL
+stz WRDIVB
+stz HTIMEH
+stz VTIMEH
+stz HDMAEN
 
-	
-.segment "CODE"
-IRQ:
-	bit $4211	; it is required to read this register
-				; in the IRQ handler
-IRQ_end:
-	rti
+lda #$0080
+sta INIDISP ; Turn off screen ("forced blank")
 
-	
-	
+; Zero some registers used for rendering
+stz OAMADDL
+stz OAMADDH
+stz BGMODE
+stz BG1SC
+stz BG3SC
+stz BG12NBA
+stz VMADDL
+stz VMADDH
+stz W12SEL
+stz WH0
+stz WH2
+stz WBGLOG
+stz TM
+stz TMW
 
-RESET:
-	sei			; turn off IRQs
-	clc
-	xce			; turn off 6502 emulation mode
-	rep #$38 	;AXY16 and clear decimal mode.
-	ldx #$1fff
-	txs			; set the stack pointer
-	phk
-	plb 		;set b to current bank, 00
-	
-; Initialize the CPU I/O registers to predictable values
-	lda #$4200
-	tcd			; temporarily move direct page to S-CPU I/O area
-	lda #$FF00
-	sta $00
-	stz $00
-	stz $02
-	stz $04
-	stz $06
-	stz $08
-	stz $0A
-	stz $0C
+; Disable color math / etc
+ldx #$0030
+stx CGWSEL
+ldy #$00E0
+sty COLDATA
 
-; Initialize the PPU registers to predictable values
-	lda #$2100
-	tcd			 ; temporarily move direct page to PPU I/O area
+; setAXY16
 
-; first clear the regs that take a 16-bit write
-	lda #$0080
-	sta $00		 ; Enable forced blank
-	stz $02
-	stz $05
-	stz $07
-	stz $09
-	stz $0B
-	stz $16
-	stz $24
-	stz $26
-	stz $28
-	stz $2A
-	stz $2C
-	stz $2E
-	ldx #$0030
-	stx $30		 ; Disable color math
-	ldy #$00E0
-	sty $32		 ; Clear red, green, and blue components of COLDATA
-				 ; also 0 to 2133, normal video at 224 pixels high
-
-; now clear the regs that need 8-bit writes
-	setA8
-	sta $15		 ; still $80: Inc VRAM pointer after high byte write
-	stz $1A
-	stz $21
-	stz $23 ;window, 24,25 above
-
-; The scroll registers $210D-$2114 need double 8-bit writes
-	.repeat 8, I
-		stz $0D+I
-		stz $0D+I
-	.endrepeat
-
-; As do the mode 7 registers, which we set to the identity matrix
-	; [ $0100	$0000 ]
-	; [ $0000	$0100 ]
-	lda #$01
-	stz $1B
-	sta $1B
-	stz $1C
-	stz $1C
-	stz $1D
-	stz $1D
-	stz $1E
-	sta $1E
-	stz $1F
-	stz $1F
-	stz $20
-	stz $20
-	
-	
-	
-	setAXY16
-	lda #$0000
-	tcd				; return direct page to real zero page
-
-
-;the next 17 lines adapted from code by Oziphantom
-
+; Zero window masks
+stz WOBJSEL
 Clear_WRAM:
 	setA16
 	setXY8
@@ -135,7 +79,7 @@ Clear_WRAM:
 	sta $420d ;fastROM
 
 	setAXY16
-	; jml Main ;should jump into the $80 bank, fast ROM
+ jml entry_main;should jump into the $80 bank, fast ROM
 	
 ;we are still in forced blank, main code will have to turn the screen on
 
