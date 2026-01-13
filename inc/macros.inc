@@ -23,8 +23,9 @@
 .endmacro
 
 
-.macro  dma0   p_addr_src p_addr_dest p_size p_tmode
-	lda #p_tmode
+;.macro  dma0trans   p_addr_src p_addr_dest p_size p_tmode
+.macro  dma0trans p_addr_src, p_addr_dest, p_size, p_tmode
+	lda p_tmode
 	sta DMAP0
 	lda #p_addr_dest
 	sta BBAD0
