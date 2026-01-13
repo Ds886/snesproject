@@ -29,8 +29,7 @@ $(PATH_OUT)/res/%.chr $(PATH_OUT)/res/%.pic: $(PATH_RES)/%.png
 	cp $< "${PATH_OUT}/res"
 	$(BIN_GFX4SNES)  \
 		-i "${PATH_OUT}/$<" \
-		-X 64 \
-		-Y 64
+		-m 
 
 $(OBJ): $(SRC) $(RES:%=$(PATH_OUT)/res/%.chr) $(RES:%=$(PATH_OUT)/res/%.pal)
 	mkdir -p "$(PATH_OUT)"
