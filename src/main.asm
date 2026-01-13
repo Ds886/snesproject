@@ -49,7 +49,12 @@ init_gfx:
 	sta INIDISP
 
 	load_tile Moon
-	; load_tile Img0
+	; sep #$20
+	; lda #$80
+	; sta INIDISP
+	jsr reset_gfx
+	setAXY16
+	load_tile Img0
 
 	lda #1
 	sta BGMODE
@@ -62,6 +67,14 @@ init_gfx:
 	sta INIDISP
 	rts
 
+reset_gfx:
+	; jsr Clear_WRAM
+	jsr DMA_Palette
+	jsr Clear_Palette
+	jsr DMA_OAM
+	jsr Clear_VRAM
+
+	rts
 init_vars:
 	rts
 
