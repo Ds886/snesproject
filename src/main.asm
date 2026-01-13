@@ -35,22 +35,12 @@ entry_main:
 	plb
 	jsr init_vars
 	jsr init_gfx
-	; jsr draw_sprite
 main_loop:
+	; insert alt code path here
 	nop
 main_loop_default:
-	; jsr draw
 	wai
 	jmp main_loop
-
-draw_sprite:
-	lda #$10
-	sta TM
-	lda #$0f
-	sta INIDISP
-	lda #$81
-	sta NMITIMEN
-
 	rts
 
 init_gfx:
