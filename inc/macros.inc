@@ -21,3 +21,19 @@
 .macro setXY16
 	rep #$10
 .endmacro
+
+
+.macro  dma0   p_addr_src p_addr_dest p_size p_tmode
+	lda #p_tmode
+	sta DMAP0
+	lda #p_addr_dest
+	sta BBAD0
+	ldx #.loword(p_addr_src)
+	stx A1T0L
+	lda #^p_addr_src
+	sta A1B0
+	ldx #p_size
+	stx DAS0L
+	lda #1
+	sta MDMAEN
+.endmacro
