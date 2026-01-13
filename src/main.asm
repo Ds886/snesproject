@@ -4,27 +4,13 @@
 .include "macros.inc"
 .include "registers.inc"
 
+.include "res.inc"
+
 .include "header.asm"
 
 .segment "ZEROPAGE"
 in_nmi: .res 2
 
-.segment "CODE1"
-Moon_CharData: .incbin "../res/moon/moon.chr"
-Moon_CharData_end:
-Moon_CharData_size = Moon_CharData_end - Moon_CharData
-EmptyVRAM:
-	.res 256, 0    ; 256 bytes of zeros used for the VRAM clear
-EmptyVRAM_end:
-
-.segment "CODE2"
-Moon_ColorData: .incbin "../res/moon/moon.pal"
-Moon_ColorData_end:
-Moon_ColorData_size = Moon_ColorData_end - Moon_ColorData
-
-Moon_TileData: .incbin "../res/moon/moon.map"
-Moon_TileData_end:
-Moon_TileData_size = Moon_TileData_end - Moon_TileData
 
 .segment "BSS"
 PAL_BUFFER: .res 512 ;palette
@@ -73,6 +59,7 @@ init_gfx:
 	sta INIDISP
 
 	load_tile Moon
+	; load_tile Img0
 
 	lda #1
 	sta BGMODE
@@ -83,13 +70,6 @@ init_gfx:
 	sta TM
 	lda #$0F
 	sta INIDISP
-	rts
-init_gfx_clear_rem:
-	ldx #$6200
-	stx VMADDL
-	lda #$80
-	sta VMAIN
-	dma0trans EmptyVRAM, VMDATAL, $1E00, #0
 	rts
 
 init_vars:
