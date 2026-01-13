@@ -10,21 +10,21 @@
 in_nmi: .res 2
 
 .segment "CODE1"
-CharData: .incbin "../res/moon/moon.chr"
-CharData_end:
-CharData_size = CharData_end - CharData
+Moon_CharData: .incbin "../res/moon/moon.chr"
+Moon_CharData_end:
+Moon_CharData_size = Moon_CharData_end - Moon_CharData
 EmptyVRAM:
 	.res 256, 0    ; 256 bytes of zeros used for the VRAM clear
 EmptyVRAM_end:
 
 .segment "CODE2"
-ColorData: .incbin "../res/moon/moon.pal"
-ColorData_end:
-ColorData_size = ColorData_end - ColorData
+Moon_ColorData: .incbin "../res/moon/moon.pal"
+Moon_ColorData_end:
+Moon_ColorData_size = Moon_ColorData_end - Moon_ColorData
 
-TileData: .incbin "../res/moon/moon.map"
-TileData_end:
-TileData_size = TileData_end - TileData
+Moon_TileData: .incbin "../res/moon/moon.map"
+Moon_TileData_end:
+Moon_TileData_size = Moon_TileData_end - Moon_TileData
 
 .segment "BSS"
 PAL_BUFFER: .res 512 ;palette
@@ -67,35 +67,12 @@ draw_sprite:
 
 	rts
 
-draw:
-	lda #$ff
-	sta CGDATA
-	lda #$ff
-	sta CGDATA
-	lda #$0f
-	sta INIDISP
-	rts
-
-
 init_gfx:
 	sep #$20
 	lda #$80
 	sta INIDISP
-	setAXY16
-init_gfx_cg:
-	; dma0trans #$00, ColorData, #$22, #ColorData_size, #1
-	dma0trans  ColorData, CGDATA, ColorData_size, 1 
-init_gfx_tiles:
-	lda #$80 ; the value $80
-	sta VMAIN  ; $2115 = set the increment mode +1
-	ldx #$0000
-	stx VMADDL ; $2116 set an address in the vram of $0000
-	dma0trans CharData, VMDATAL, CharData_size, #1
-init_gfx_map:
-	ldx #$6000
-	stx VMADDL ; $2116 set an address in the vram of $6000
 
-	dma0trans TileData, VMDATAL, TileData_size, #1
+	load_tile Moon
 
 	lda #1
 	sta BGMODE
