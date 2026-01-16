@@ -33,7 +33,7 @@ $(PATH_OUT)/res/%.chr $(PATH_OUT)/res/%.pic: $(PATH_RES)/%.png
 
 $(OBJ): $(SRC) $(RES:%=$(PATH_OUT)/res/%.chr) $(RES:%=$(PATH_OUT)/res/%.pal)
 	mkdir -p "$(PATH_OUT)"
-	$(BIN_CA65) -o $@ -I ./inc $(SRC) --debug-info
+	$(BIN_CA65)  -o $@ -I ./inc $(SRC) -l out/main.lst --debug-info
 
 $(OUT): $(OBJ) $(CFG)
 	$(BIN_LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile "./${PATH_OUT}/main.dbg"
