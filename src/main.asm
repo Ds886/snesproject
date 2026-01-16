@@ -48,13 +48,13 @@ init_gfx:
 	lda #$80
 	sta INIDISP
 
-	load_tile Moon
+	setAXY16
 	; sep #$20
 	; lda #$80
 	; sta INIDISP
+	load_tile Moon
 	jsr reset_gfx
-	setAXY16
-	load_tile Img0
+	load_tile Img3
 
 	lda #1
 	sta BGMODE

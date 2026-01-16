@@ -18,7 +18,7 @@ SRC = ${PATH_SRC}/main.asm
 CFG = ${PATH_SRC}/memmap.cfg
 OBJ = ${PATH_OUT}/main.o
 OUT = ${PATH_OUT}/main.smc
-RES = img_16 img1_16 img2_16
+RES = img_16 img1_16 img2_16 img3_16 img4_16
 
 # Rules
 all: $(OUT)
