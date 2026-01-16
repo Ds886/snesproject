@@ -60,11 +60,11 @@ Clear_WRAM:
 	lda	#.loword(DMAZero)
 	sta $4302 ; and 4303
 	ldx #^DMAZero ;bank #
-	stx A1B0
+	stx $4304
 	stz $4305 ;and 4306 = size 0000 = $10000
 	ldx #1
-	stx MDMAEN ; DMA_ENABLE, clear the 1st half of WRAM
-	stx MDMAEN ; DMA_ENABLE, clear the 2nd half of WRAM
+	stx $420B ; DMA_ENABLE, clear the 1st half of WRAM
+	stx $420B ; DMA_ENABLE, clear the 2nd half of WRAM
 	
 	setA8
 	setXY16
@@ -103,11 +103,11 @@ Clear_Palette:
 	ldx	#.loword(DMAZero)
 	stx $4302 ; and 4303
 	lda #^DMAZero ;bank #
-	sta A1B0
+	sta $4304
 	ldx #$200 ;512 bytes
 	stx $4305 ; and 4306
 	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	sta $420B ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 	
@@ -123,11 +123,11 @@ DMA_Palette:
 	ldx	#.loword(PAL_BUFFER)
 	stx $4302 ; and 4303
 	lda #^PAL_BUFFER ;bank #
-	sta A1B0
+	sta $4304
 	ldx #$200 ;512 bytes
 	stx $4305 ; and 4306
 	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	sta $420B ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 
@@ -147,20 +147,20 @@ Clear_OAM:
 	ldx	#.loword(SpriteEmptyVal)
 	stx $4302 ; and 4303
 	lda #^SpriteEmptyVal ;bank #
-	sta A1B0
+	sta $4304
 	ldx #$200 ;size 512 bytes
 	stx $4305 ;and 4306
 	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	sta $420B ; DMA_ENABLE start dma, channel 0
 
 	ldx	#.loword(SpriteUpperEmpty)
 	stx $4302 ; and 4303
 	lda #^SpriteUpperEmpty ;bank #
-	sta A1B0
+	sta $4304
 	ldx #$0020 ;size 32 bytes
 	stx $4305 ;and 4306
 	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	sta $420B ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 	
@@ -177,11 +177,11 @@ DMA_OAM:
 	lda #.loword(OAM_BUFFER)
 	sta $4302 ; source
 	ldx #^OAM_BUFFER
-	stx A1B0 ; bank
+	stx $4304 ; bank
 	lda #544
 	sta $4305 ; length
 	ldx #1
-	stx MDMAEN ; DMA_ENABLE start dma, channel 0
+	stx $420B ; DMA_ENABLE start dma, channel 0
 	plp
 	rts		
 
@@ -199,9 +199,9 @@ Clear_VRAM:
 	lda	#.loword(DMAZero)
 	sta $4302 ; and 4303
 	ldx #^DMAZero ;bank #
-	stx A1B0
+	stx $4304
 	ldx #1
-	stx MDMAEN ; DMA_ENABLE start dma, channel 0
+	stx $420B ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 

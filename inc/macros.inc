@@ -24,24 +24,18 @@
 
 ;.macro  dma0trans   p_addr_src p_addr_dest p_size p_tmode
 .macro  dma0trans p_addr_src, p_addr_dest, p_size, p_tmode
-	php
-	setA8
-	setXY16
-
 	lda p_tmode
 	sta DMAP0
 	lda #p_addr_dest
 	sta BBAD0
-	sta A1B0
-	ldx #p_size
 	ldx #.loword(p_addr_src)
 	stx A1T0L
 	lda #^p_addr_src
+	sta A1B0
+	ldx #p_size
 	stx DAS0L
 	lda #1
 	sta MDMAEN
-
-	plp
 .endmacro
 
 .macro load_tile p_tile_name
