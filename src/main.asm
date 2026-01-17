@@ -21,18 +21,18 @@ OAM_BUFFER2: .res 32 ;high table
 entry:
 	.include "init_v1.asm"
 entry_main:
-.a16 ; the setting from init code
-.i16
+	.a16 ; the setting from init code
+	.i16
 	phk
 	plb
 	; ; init nmi
 	; lda #$80
 	; sta NMITIMEN
-	cli
 	; Init DBR
 	lda #$00
 	pha
 	plb
+	cli
 	jsr init_vars
 	jsr init_gfx
 main_loop:
@@ -45,6 +45,8 @@ main_loop_default:
 
 init_gfx:
 	sep #$20
+	lda #$00
+	sta NMITIMEN
 	lda #$80
 	sta INIDISP
 
@@ -52,8 +54,8 @@ init_gfx:
 	; sep #$20
 	; lda #$80
 	; sta INIDISP
-	load_tile Moon
-	jsr reset_gfx
+	; load_tile Moon
+	; jsr reset_gfx
 	load_tile Img3
 
 	lda #1
@@ -68,6 +70,7 @@ init_gfx:
 	rts
 
 reset_gfx:
+	jsr wait_vblank
 	; jsr Clear_WRAM
 	jsr DMA_Palette
 	jsr Clear_Palette

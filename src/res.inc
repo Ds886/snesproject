@@ -63,3 +63,7 @@ Img3_TileData_size = Img3_TileData_end - Img3_TileData
 EmptyVRAM:
 	.res 256, 0    ; 256 bytes of zeros used for the VRAM clear
 EmptyVRAM_end:
+
+.segment "CODE7"
+dma_bitmask:
+    .byte 1,2,4,8,16,32,64,128

@@ -50,24 +50,14 @@ sty COLDATA
 ; Zero window masks
 stz WOBJSEL
 Clear_WRAM:
-	setA16
-	setXY8
-	stz $2181 ;WRAM_ADDR_L
-	stz $2182 ;WRAM_ADDR_M
-	
-	lda #$8008 ;fixed transfer to WRAM data 2180
-	sta $4300 ; and 4301
-	lda	#.loword(DMAZero)
-	sta $4302 ; and 4303
-	ldx #^DMAZero ;bank #
-	stx A1B0
-	stz $4305 ;and 4306 = size 0000 = $10000
-	ldx #1
-	stx MDMAEN ; DMA_ENABLE, clear the 1st half of WRAM
-	stx MDMAEN ; DMA_ENABLE, clear the 2nd half of WRAM
-	
 	setA8
 	setXY16
+	jsr wait_vblank
+	stz WMADDL
+	stz WMADDM
+	; stz WMADDH
+	dma_trans 0, DMAZero, $80, $0000, #$08, 2
+
 	jsr Clear_Palette
 	jsr DMA_Palette
 	jsr Clear_OAM
@@ -95,19 +85,9 @@ Clear_Palette:
 	setA8
 	setXY16
 	ldx #.loword(PAL_BUFFER) 
-	stx $2181 ;WRAM_ADDR_L
-	stz $2183 ;WRAM_ADDR_H
-
-	ldx #$8008 ;fixed transfer to WRAM data 2180
-	stx $4300 ; and 4301
-	ldx	#.loword(DMAZero)
-	stx $4302 ; and 4303
-	lda #^DMAZero ;bank #
-	sta A1B0
-	ldx #$200 ;512 bytes
-	stx $4305 ; and 4306
-	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	stx WMADDL ;WRAM_ADDR_L
+	stz WMADDH ;WRAM_ADDR_H
+	dma_trans 0, DMAZero, WMDATA, $0200, #$08
 	plp
 	rts
 	
@@ -117,17 +97,9 @@ DMA_Palette:
 	php
 	setA8
 	setXY16
-	stz $2121 ;Palette Address 
-	ldx #$2200 ;1 reg 1 write, to PAL_DATA 2122
-	stx $4300 ; and 4301
-	ldx	#.loword(PAL_BUFFER)
-	stx $4302 ; and 4303
-	lda #^PAL_BUFFER ;bank #
-	sta A1B0
-	ldx #$200 ;512 bytes
-	stx $4305 ; and 4306
-	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	stz CGADD ;Palette Address
+
+	dma_trans 0, PAL_BUFFER, CGDATA, $0200, #$00
 	plp
 	rts
 
@@ -138,29 +110,13 @@ Clear_OAM:
 	php
 	setA8
 	setXY16
-	ldx #.loword(OAM_BUFFER) 
-	stx $2181 ;WRAM_ADDR_L
-	stz $2183 ;WRAM_ADDR_H
-	
-	ldx #$8008 ;fixed transfer to WRAM data 2180
-	stx $4300
-	ldx	#.loword(SpriteEmptyVal)
-	stx $4302 ; and 4303
-	lda #^SpriteEmptyVal ;bank #
-	sta A1B0
-	ldx #$200 ;size 512 bytes
-	stx $4305 ;and 4306
-	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
 
-	ldx	#.loword(SpriteUpperEmpty)
-	stx $4302 ; and 4303
-	lda #^SpriteUpperEmpty ;bank #
-	sta A1B0
-	ldx #$0020 ;size 32 bytes
-	stx $4305 ;and 4306
-	lda #1
-	sta MDMAEN ; DMA_ENABLE start dma, channel 0
+	ldx #.loword(OAM_BUFFER) 
+	stx WMADDL ;2181
+	stz WMADDH ;2183
+	dma_trans 0, SpriteEmptyVal, WMDATA, $0200, #$08
+	dma_trans 0, SpriteUpperEmpty, WMDATA, $0020, #$08
+
 	plp
 	rts
 	
@@ -168,40 +124,37 @@ Clear_OAM:
 DMA_OAM:
 ;copy from OAM BUFFER to the OAM RAM
 	php
-	setA16
-	setXY8
-	stz $2102 ;OAM address
-	
-	lda #$0400 ;1 reg 1 write, 2104 oam data
-	sta $4300
-	lda #.loword(OAM_BUFFER)
-	sta $4302 ; source
-	ldx #^OAM_BUFFER
-	stx A1B0 ; bank
-	lda #544
-	sta $4305 ; length
-	ldx #1
-	stx MDMAEN ; DMA_ENABLE start dma, channel 0
+	OAM_BUFFER_H = OAM_BUFFER + $200
+	stz OAMADDL ;2102
+	stz OAMADDH ;
+	dma_trans 0, OAM_BUFFER, OAMDATA, $0200, #$00
+	dma_trans 0, OAM_BUFFER_H, OAMDATA, $0020, #$00
 	plp
 	rts		
 
 
 Clear_VRAM:
 	php
-	setA16
-	setXY8
+	VMDATA_LO = .loword(VMDATAL)
+	setA8
+	setXY16
+	; setA16
+	; setXY8
 	ldx #$80
-	stx $2115 ;VRAM increment mode +1, after the 2119 write
-	stz $2116 ;VRAM Address 
-	stz $4305 ; size $10000 bytes ($8000 words)
-	lda #$1809 ;fixed transfer (2 reg, write once) to VRAM_DATA $2118-19
-	sta $4300 ; and 4301
-	lda	#.loword(DMAZero)
-	sta $4302 ; and 4303
-	ldx #^DMAZero ;bank #
-	stx A1B0
-	ldx #1
-	stx MDMAEN ; DMA_ENABLE start dma, channel 0
+	stx VMAIN ; 2115
+	stz VMADDL ; 2116
+	stz VMADDH ; 2116
+	dma_trans 0, DMAZero, VMDATA_LO, $8000, #$09, 2
+
+	; stz $4305 ; size $10000 bytes ($8000 words)
+	; lda #$1809 ;fixed transfer (2 reg, write once) to VRAM_DATA $2118-19
+	; sta $4300 ; and 4301
+	; lda	#.loword(DMAZero)
+	; sta $4302 ; and 4303
+	; ldx #^DMAZero ;bank #
+	; stx A1B0
+	; ldx #1
+	; stx MDMAEN ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 
