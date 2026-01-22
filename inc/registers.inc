@@ -1,27 +1,9 @@
 ; SNES Registers
 
 ; Address Bus B Registers
-; OBSEL
-OBSEL       =   $2101   ;   Object Size and Character Size Register   single   write   f-blank, v-blank
-OBSEL_MODE_8_8_16_16   = %00000000      ; 000 = 8×8 and 16×16 sprites
-OBSEL_MODE_8_8_32_32   = %00100000      ; 001 = 8×8 and 32×32 sprites
-OBSEL_MODE_8_8_64_64   = %01000000      ; 010 = 8×8 and 64×64 sprites
-OBSEL_MODE_16_16_32_32 = %01100000      ; 011 = 16×16 and 32×32 sprites
-OBSEL_MODE_16_16_64_64 = %10000000      ; 100 = 16×16 and 64×64 sprites
-OBSEL_MODE_32_32_64_64 = %10100000      ; 101 = 32×32 and 64×64 sprites
-
-; TM/TS
-TM          =   $212C   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
-TS          =   $212D   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
-
-; Screen enable bits (bits 4-0)
-TM_SCREEN_BG1 = %00000001                  ; Enable BG1 for display
-TM_SCREEN_BG2 = %00000010                  ; Enable BG2 for display
-TM_SCREEN_BG3 = %00000100                  ; Enable BG3 for display
-TM_SCREEN_BG4 = %00001000                  ; Enable BG4 for display
-TM_SCREEN_OBJ = %00010000                  ; Enable OBJ for display
 
 INIDISP     =   $2100   ;   Screen Display Register   single   write   any time
+OBSEL       =   $2101   ;   Object Size and Character Size Register   single   write   f-blank, v-blank
 OAMADDL     =   $2102   ;   OAM Address Registers (Low)   single   write   f-blank, v-blank
 OAMADDH     =   $2103   ;   OAM Address Registers (High)   single   write   f-blank, v-blank
 OAMDATA     =   $2104   ;   OAM Data Write Register   single   write   f-blank, v-blank
@@ -64,6 +46,8 @@ WH2         =   $2128   ;   Window Position Registers (WH2)   single   write   f
 WH3         =   $2129   ;   Window Position Registers (WH3)   single   write   f-blank, v-blank, h-blank
 WBGLOG      =   $212A   ;   Window Mask Logic registers (BG)   single   write   f-blank, v-blank, h-blank
 WOBJLOG     =   $212B   ;   Window Mask Logic registers (OBJ)   single   write   f-blank, v-blank, h-blank
+TM          =   $212C   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
+TS          =   $212D   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
 TMW         =   $212E   ;   Window Mask Destination Registers   single   write   f-blank, v-blank, h-blank
 TSW         =   $212F   ;   Window Mask Destination Registers   single   write   f-blank, v-blank, h-blank
 CGWSEL      =   $2130   ;   Color Math Registers   single   write   f-blank, v-blank, h-blank
