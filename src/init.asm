@@ -1,129 +1,63 @@
-;init code for SNES
-;much borrowed from Damian Yerrick
-;some borrowed from Oziphantom
+; A very simple SNES init routine
+; For serious use, you probably want to do more than this
+; This is simple and understandable, though
+; Will leave you in A8 XY16 mode
 
-.p816
-.smart
+; Disable interrupts and enable native mode
+sei
+clc
+xce
+cld
 
+setAXY16
 
+; ZeroCPU registers NMITIMEN through MEMSEL
+stz NMITIMEN
+stz WRMPYA
+stz WRDIVL
+stz WRDIVB
+stz HTIMEH
+stz VTIMEH
+stz HDMAEN
 
-	
-.segment "CODE"
-IRQ:
-	bit $4211	; it is required to read this register
-				; in the IRQ handler
-IRQ_end:
-	rti
+lda #$0080
+sta INIDISP ; Turn off screen ("forced blank")
 
-	
-	
+; Zero some registers used for rendering
+stz OAMADDL
+stz OAMADDH
+stz BGMODE
+stz BG1SC
+stz BG3SC
+stz BG12NBA
+stz VMADDL
+stz VMADDH
+stz W12SEL
+stz WH0
+stz WH2
+stz WBGLOG
+stz TM
+stz TMW
 
-RESET:
-	sei			; turn off IRQs
-	clc
-	xce			; turn off 6502 emulation mode
-	rep #$38 	;AXY16 and clear decimal mode.
-	ldx #$1fff
-	txs			; set the stack pointer
-	phk
-	plb 		;set b to current bank, 00
-	
-; Initialize the CPU I/O registers to predictable values
-	lda #$4200
-	tcd			; temporarily move direct page to S-CPU I/O area
-	lda #$FF00
-	sta $00
-	stz $00
-	stz $02
-	stz $04
-	stz $06
-	stz $08
-	stz $0A
-	stz $0C
+; Disable color math / etc
+ldx #$0030
+stx CGWSEL
+ldy #$00E0
+sty COLDATA
 
-; Initialize the PPU registers to predictable values
-	lda #$2100
-	tcd			 ; temporarily move direct page to PPU I/O area
+; setAXY16
 
-; first clear the regs that take a 16-bit write
-	lda #$0080
-	sta $00		 ; Enable forced blank
-	stz $02
-	stz $05
-	stz $07
-	stz $09
-	stz $0B
-	stz $16
-	stz $24
-	stz $26
-	stz $28
-	stz $2A
-	stz $2C
-	stz $2E
-	ldx #$0030
-	stx $30		 ; Disable color math
-	ldy #$00E0
-	sty $32		 ; Clear red, green, and blue components of COLDATA
-				 ; also 0 to 2133, normal video at 224 pixels high
-
-; now clear the regs that need 8-bit writes
-	setA8
-	sta $15		 ; still $80: Inc VRAM pointer after high byte write
-	stz $1A
-	stz $21
-	stz $23 ;window, 24,25 above
-
-; The scroll registers $210D-$2114 need double 8-bit writes
-	.repeat 8, I
-		stz $0D+I
-		stz $0D+I
-	.endrepeat
-
-; As do the mode 7 registers, which we set to the identity matrix
-	; [ $0100	$0000 ]
-	; [ $0000	$0100 ]
-	lda #$01
-	stz $1B
-	sta $1B
-	stz $1C
-	stz $1C
-	stz $1D
-	stz $1D
-	stz $1E
-	sta $1E
-	stz $1F
-	stz $1F
-	stz $20
-	stz $20
-	
-	
-	
-	setAXY16
-	lda #$0000
-	tcd				; return direct page to real zero page
-
-
-;the next 17 lines adapted from code by Oziphantom
-
+; Zero window masks
+stz WOBJSEL
 Clear_WRAM:
-	setA16
-	setXY8
-	stz $2181 ;WRAM_ADDR_L
-	stz $2182 ;WRAM_ADDR_M
-	
-	lda #$8008 ;fixed transfer to WRAM data 2180
-	sta $4300 ; and 4301
-	lda	#.loword(DMAZero)
-	sta $4302 ; and 4303
-	ldx #^DMAZero ;bank #
-	stx $4304
-	stz $4305 ;and 4306 = size 0000 = $10000
-	ldx #1
-	stx $420B ; DMA_ENABLE, clear the 1st half of WRAM
-	stx $420B ; DMA_ENABLE, clear the 2nd half of WRAM
-	
 	setA8
 	setXY16
+	jsr wait_vblank
+	stz WMADDL
+	stz WMADDM
+	; stz WMADDH
+	dma_trans 0, DMAZero, $80, $0000, #$08, 2
+
 	jsr Clear_Palette
 	jsr DMA_Palette
 	jsr Clear_OAM
@@ -135,7 +69,7 @@ Clear_WRAM:
 	sta $420d ;fastROM
 
 	setAXY16
-	; jml Main ;should jump into the $80 bank, fast ROM
+ jml entry_main;should jump into the $80 bank, fast ROM
 	
 ;we are still in forced blank, main code will have to turn the screen on
 
@@ -151,19 +85,9 @@ Clear_Palette:
 	setA8
 	setXY16
 	ldx #.loword(PAL_BUFFER) 
-	stx $2181 ;WRAM_ADDR_L
-	stz $2183 ;WRAM_ADDR_H
-
-	ldx #$8008 ;fixed transfer to WRAM data 2180
-	stx $4300 ; and 4301
-	ldx	#.loword(DMAZero)
-	stx $4302 ; and 4303
-	lda #^DMAZero ;bank #
-	sta $4304
-	ldx #$200 ;512 bytes
-	stx $4305 ; and 4306
-	lda #1
-	sta $420B ; DMA_ENABLE start dma, channel 0
+	stx WMADDL ;WRAM_ADDR_L
+	stz WMADDH ;WRAM_ADDR_H
+	dma_trans 0, DMAZero, WMDATA, $0200, #$08
 	plp
 	rts
 	
@@ -173,17 +97,9 @@ DMA_Palette:
 	php
 	setA8
 	setXY16
-	stz $2121 ;Palette Address 
-	ldx #$2200 ;1 reg 1 write, to PAL_DATA 2122
-	stx $4300 ; and 4301
-	ldx	#.loword(PAL_BUFFER)
-	stx $4302 ; and 4303
-	lda #^PAL_BUFFER ;bank #
-	sta $4304
-	ldx #$200 ;512 bytes
-	stx $4305 ; and 4306
-	lda #1
-	sta $420B ; DMA_ENABLE start dma, channel 0
+	stz CGADD ;Palette Address
+
+	dma_trans 0, PAL_BUFFER, CGDATA, $0200, #$00
 	plp
 	rts
 
@@ -194,29 +110,13 @@ Clear_OAM:
 	php
 	setA8
 	setXY16
-	ldx #.loword(OAM_BUFFER) 
-	stx $2181 ;WRAM_ADDR_L
-	stz $2183 ;WRAM_ADDR_H
-	
-	ldx #$8008 ;fixed transfer to WRAM data 2180
-	stx $4300
-	ldx	#.loword(SpriteEmptyVal)
-	stx $4302 ; and 4303
-	lda #^SpriteEmptyVal ;bank #
-	sta $4304
-	ldx #$200 ;size 512 bytes
-	stx $4305 ;and 4306
-	lda #1
-	sta $420B ; DMA_ENABLE start dma, channel 0
 
-	ldx	#.loword(SpriteUpperEmpty)
-	stx $4302 ; and 4303
-	lda #^SpriteUpperEmpty ;bank #
-	sta $4304
-	ldx #$0020 ;size 32 bytes
-	stx $4305 ;and 4306
-	lda #1
-	sta $420B ; DMA_ENABLE start dma, channel 0
+	ldx #.loword(OAM_BUFFER) 
+	stx WMADDL ;2181
+	stz WMADDH ;2183
+	dma_trans 0, SpriteEmptyVal, WMDATA, $0200, #$08
+	dma_trans 0, SpriteUpperEmpty, WMDATA, $0020, #$08
+
 	plp
 	rts
 	
@@ -224,50 +124,37 @@ Clear_OAM:
 DMA_OAM:
 ;copy from OAM BUFFER to the OAM RAM
 	php
-	setA16
-	setXY8
-	stz $2102 ;OAM address
-	
-	lda #$0400 ;1 reg 1 write, 2104 oam data
-	sta $4300
-	lda #.loword(OAM_BUFFER)
-	sta $4302 ; source
-	ldx #^OAM_BUFFER
-	stx $4304 ; bank
-	lda #544
-	sta $4305 ; length
-	ldx #1
-	stx $420B ; DMA_ENABLE start dma, channel 0
+	; needed to convince the asmbler
+	OAM_BUFFER_H = OAM_BUFFER + $200
+	stz OAMADDL ;2102
+	stz OAMADDH ;
+	dma_trans 0, OAM_BUFFER, OAMDATA, $0200, #$00
+	dma_trans 0, OAM_BUFFER_H, OAMDATA, $0020, #$00
 	plp
 	rts		
 
 
 Clear_VRAM:
 	php
-	setA16
-	setXY8
+	; needed to convince the asmbler
+	VMDATA_LO = .loword(VMDATAL)
+	setA8
+	setXY16
 	ldx #$80
-	stx $2115 ;VRAM increment mode +1, after the 2119 write
-	stz $2116 ;VRAM Address 
-	stz $4305 ; size $10000 bytes ($8000 words)
-	lda #$1809 ;fixed transfer (2 reg, write once) to VRAM_DATA $2118-19
-	sta $4300 ; and 4301
-	lda	#.loword(DMAZero)
-	sta $4302 ; and 4303
-	ldx #^DMAZero ;bank #
-	stx $4304
-	ldx #1
-	stx $420B ; DMA_ENABLE start dma, channel 0
+	stx VMAIN ; 2115
+	stz VMADDL ; 2116
+	stz VMADDH ; 2116
+	dma_trans 0, DMAZero, VMDATA_LO, $8000, #$09, 2
 	plp
 	rts
 
 
 
-SpriteUpperEmpty: ;my sprite code assumes hi table of zero
 DMAZero:
 .word $0000
 
 SpriteEmptyVal:
 .byte 224
+SpriteUpperEmpty:
 
 setAXY16

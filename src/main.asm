@@ -12,7 +12,7 @@
 
 .segment "CODE"
 entry:
-	.include "init_v1.asm"
+	.include "init.asm"
 entry_main:
 	.a16 ; the setting from init code
 	.i16
