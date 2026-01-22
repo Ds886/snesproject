@@ -41,9 +41,9 @@ stz TM
 stz TMW
 
 ; Disable color math / etc
-ldx #$0030
+ldx #(CGWSEL_MODE_MAIN_BLACK | CGWSEL_MODE_SUB_ALWAYS | CGWSEL_MODE_CLIP_NEVER | CGWSEL_MODE_PREVENT_NEVER)
 stx CGWSEL
-ldy #$00E0
+ldy #(COLDATA_BLUE_EN | COLDATA_GREEN_EN | COLDATA_RED_EN)
 sty COLDATA
 
 ; setAXY16
@@ -57,7 +57,7 @@ Clear_WRAM:
 	stz WMADDL
 	stz WMADDM
 	; stz WMADDH
-	dma_trans 0, DMAZero, $80, $0000, #$08, 2
+	dma_trans 0, DMAZero, WMDATA, $0000, #DMA_MODE_TO_WRAM_1REG, 2
 
 	jsr Clear_Palette
 	jsr DMA_Palette
@@ -141,7 +141,7 @@ Clear_VRAM:
 	VMDATA_LO = .loword(VMDATAL)
 	setA8
 	setXY16
-	ldx #$80
+	ldx #VMAIN_INC_AFTER_HIGH
 	stx VMAIN ; 2115
 	stz VMADDL ; 2116
 	stz VMADDH ; 2116

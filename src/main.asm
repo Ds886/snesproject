@@ -19,7 +19,7 @@ entry_main:
 	phk
 	plb
 	; init nmi
-	lda #$80
+	lda #(NMITIMEN_VBLANK_ON)
 	sta NMITIMEN
 	; Init DBR
 	lda #$00
@@ -37,23 +37,23 @@ main_loop_default:
 	rts
 
 init_gfx:
-	sep #$20
-	lda #$00
+	setA8
+	lda #NMITIMEN_DISABLE
 	sta NMITIMEN
-	lda #$80
+	lda #INIDISP_FORCE_BLANK
 	sta INIDISP
 
 	setAXY16
 	; graphics init stuff
 
-	lda #1
+	lda #BGMODE_MODE1_2BG_TEXT
 	sta BGMODE
 	stz BG12NBA
-	lda #$60
+	lda #(BGSC_SIZE_64x32 | $20)
 	sta BG1SC
-	lda #$01 ; BG_on
+	lda #TM_EN_BG1
 	sta TM
-	lda #$0F
+	lda #INIDISP_ON_FULL
 	sta INIDISP
 	rts
 
