@@ -91,11 +91,11 @@ WBGLOG      =   $212A   ;   Window Mask Logic registers (BG)   single   write   
 WOBJLOG     =   $212B   ;   Window Mask Logic registers (OBJ)   single   write   f-blank, v-blank, h-blank
 
 ; TM
-TM_EN_TM_EN_BG1G1 = $01
-TM_EN_TM_EN_BG1G2 = $02
-TM_EN_TM_EN_BG1G3 = $04
-TM_EN_TM_EN_BG1G4 = $08
-TM_EN_TM_EN_BG1BJ = $10
+TM_EN_BG1 = $01
+TM_EN_BG2 = $02
+TM_EN_BG3 = $04
+TM_EN_BG4 = $08
+TM_EN_BG1BJ = $10
 
 TM          =   $212C   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
 
