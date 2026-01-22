@@ -124,6 +124,7 @@ Clear_OAM:
 DMA_OAM:
 ;copy from OAM BUFFER to the OAM RAM
 	php
+	; needed to convince the asmbler
 	OAM_BUFFER_H = OAM_BUFFER + $200
 	stz OAMADDL ;2102
 	stz OAMADDH ;
@@ -135,36 +136,25 @@ DMA_OAM:
 
 Clear_VRAM:
 	php
+	; needed to convince the asmbler
 	VMDATA_LO = .loword(VMDATAL)
 	setA8
 	setXY16
-	; setA16
-	; setXY8
 	ldx #$80
 	stx VMAIN ; 2115
 	stz VMADDL ; 2116
 	stz VMADDH ; 2116
 	dma_trans 0, DMAZero, VMDATA_LO, $8000, #$09, 2
-
-	; stz $4305 ; size $10000 bytes ($8000 words)
-	; lda #$1809 ;fixed transfer (2 reg, write once) to VRAM_DATA $2118-19
-	; sta $4300 ; and 4301
-	; lda	#.loword(DMAZero)
-	; sta $4302 ; and 4303
-	; ldx #^DMAZero ;bank #
-	; stx A1B0
-	; ldx #1
-	; stx MDMAEN ; DMA_ENABLE start dma, channel 0
 	plp
 	rts
 
 
 
-SpriteUpperEmpty: ;my sprite code assumes hi table of zero
 DMAZero:
 .word $0000
 
 SpriteEmptyVal:
 .byte 224
+SpriteUpperEmpty:
 
 setAXY16

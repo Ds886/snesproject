@@ -4,18 +4,11 @@
 .include "macros.inc"
 .include "registers.inc"
 
-.include "res.inc"
 
 .include "header.asm"
 
-.segment "ZEROPAGE"
-in_nmi: .res 2
+.include "variables.asm"
 
-
-.segment "BSS"
-PAL_BUFFER: .res 512 ;palette
-OAM_BUFFER: .res 512 ;low table
-OAM_BUFFER2: .res 32 ;high table
 
 .segment "CODE"
 entry:
@@ -25,9 +18,9 @@ entry_main:
 	.i16
 	phk
 	plb
-	; ; init nmi
-	; lda #$80
-	; sta NMITIMEN
+	; init nmi
+	lda #$80
+	sta NMITIMEN
 	; Init DBR
 	lda #$00
 	pha
@@ -51,12 +44,7 @@ init_gfx:
 	sta INIDISP
 
 	setAXY16
-	; sep #$20
-	; lda #$80
-	; sta INIDISP
-	; load_tile Moon
-	; jsr reset_gfx
-	load_tile Img3
+	; graphics init stuff
 
 	lda #1
 	sta BGMODE
