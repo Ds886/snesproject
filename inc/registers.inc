@@ -2,7 +2,24 @@
 
 ; Address Bus B Registers
 
+; INIDISP - 2100
 INIDISP     =   $2100   ;   Screen Display Register   single   write   any time
+
+INIDISP_FORCE_BLANK   = %10000000
+INIDISP_OBJ_ON        = %01000000
+INIDISP_BG4_ON        = %00100000
+INIDISP_BG3_ON        = %00010000
+INIDISP_BG2_ON        = %00001000
+INIDISP_BG1_ON        = %00000100
+
+INIDISP_BRT_BLACK     = %00000000
+INIDISP_BRT_MIN       = %00000001
+INIDISP_BRT_DIM       = %00000001
+INIDISP_BRT_HALF      = %00000100
+INIDISP_BRT_FULL      = %00000111
+
+
+
 OBSEL       =   $2101   ;   Object Size and Character Size Register   single   write   f-blank, v-blank
 OAMADDL     =   $2102   ;   OAM Address Registers (Low)   single   write   f-blank, v-blank
 OAMADDH     =   $2103   ;   OAM Address Registers (High)   single   write   f-blank, v-blank
@@ -97,7 +114,13 @@ VTIMEL      =   $4209   ;   IRQ Timer Registers (Vertical - Low)   single   writ
 VTIMEH      =   $420A   ;   IRQ Timer Registers (Vertical - High)   single   write   any time
 MDMAEN      =   $420B   ;   DMA Enable Register   single   write   any time
 HDMAEN      =   $420C   ;   HDMA Enable Register   single   write   any time
+
+; MEMSEL - rom memory type (fast / slow)
 MEMSEL      =   $420D   ;   ROM Speed Register   single   write   any time
+MEMSEL_SLOW           = $00  ; $00 - Slow ROM access (2.68MHz)
+MEMSEL_FAST           = $01  ; $01 - Fast ROM access (3.58MHz)
+
+
 RDNMI       =   $4210   ;   Interrupt Flag Registers   single   read   any time
 TIMEUP      =   $4211   ;   Interrupt Flag Registers   single   read   any time
 HVBJOY      =   $4212   ;   PPU Status Register   single   read   any time
@@ -117,6 +140,30 @@ JOY4H       =   $421F   ;   Controller Port Data Registers (Pad 4 - High)   sing
 
 
 ; DMA/HDMA Registers
+
+; DMA modes
+; Transfer modes
+DMA_MODE_1REG_1WRITE     = $00  ; 1 register, write once
+DMA_MODE_2REG_1WRITE     = $01  ; 2 registers, write once  
+DMA_MODE_1REG_2WRITE     = $02  ; 1 register, write twice
+DMA_MODE_2REG_2WRITE     = $03  ; 2 registers, write twice
+DMA_MODE_4REG_1WRITE     = $04  ; 4 registers, write once
+
+; Transfer direction
+DMA_MODE_TO_PPU          = $00  ; CPU -> PPU (normal)
+DMA_MODE_FROM_PPU        = $80  ; PPU -> CPU (read from PPU)
+
+; Address increment
+DMA_MODE_INCREMENT       = $00  ; Normal increment
+DMA_MODE_DECREMENT       = $10  ; Decrement address
+DMA_MODE_FIXED           = $08  ; Fixed address (no increment)
+
+; Common modes
+DMA_MODE_PALETTE = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_SPRITE = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_TO_OAM = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_INCREMENT)
+DMA_MODE_TO_VRAM_2REG = (DMA_MODE_2REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_TO_CGRAM = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_INCREMENT)
 
 DMAP0       =   $4300   ;   (H)DMA Control Register
 BBAD0       =   $4301   ;   (H)DMA Destination Register

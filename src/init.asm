@@ -20,8 +20,9 @@ stz HTIMEH
 stz VTIMEH
 stz HDMAEN
 
-lda #$0080
-sta INIDISP ; Turn off screen ("forced blank")
+;shut down screen
+lda INIDISP_FORCE_BLANK   
+sta INIDISP
 
 ; Zero some registers used for rendering
 stz OAMADDL
@@ -65,8 +66,8 @@ Clear_WRAM:
 	jsr Clear_VRAM
 
 ;	A8
-	lda #1
-	sta $420d ;fastROM
+	lda #MEMSEL_FAST
+	sta MEMSEL ;fastROM
 
 	setAXY16
  jml entry_main;should jump into the $80 bank, fast ROM
@@ -87,7 +88,7 @@ Clear_Palette:
 	ldx #.loword(PAL_BUFFER) 
 	stx WMADDL ;WRAM_ADDR_L
 	stz WMADDH ;WRAM_ADDR_H
-	dma_trans 0, DMAZero, WMDATA, $0200, #$08
+	dma_trans 0, DMAZero, WMDATA, $0200, #DMA_MODE_PALETTE
 	plp
 	rts
 	
@@ -99,7 +100,7 @@ DMA_Palette:
 	setXY16
 	stz CGADD ;Palette Address
 
-	dma_trans 0, PAL_BUFFER, CGDATA, $0200, #$00
+	dma_trans 0, PAL_BUFFER, CGDATA, $0200, #DMA_MODE_TO_CGRAM
 	plp
 	rts
 
@@ -114,8 +115,8 @@ Clear_OAM:
 	ldx #.loword(OAM_BUFFER) 
 	stx WMADDL ;2181
 	stz WMADDH ;2183
-	dma_trans 0, SpriteEmptyVal, WMDATA, $0200, #$08
-	dma_trans 0, SpriteUpperEmpty, WMDATA, $0020, #$08
+	dma_trans 0, SpriteEmptyVal, WMDATA, $0200, #DMA_MODE_SPRITE
+	dma_trans 0, SpriteUpperEmpty, WMDATA, $0020, #DMA_MODE_SPRITE
 
 	plp
 	rts
@@ -128,8 +129,8 @@ DMA_OAM:
 	OAM_BUFFER_H = OAM_BUFFER + $200
 	stz OAMADDL ;2102
 	stz OAMADDH ;
-	dma_trans 0, OAM_BUFFER, OAMDATA, $0200, #$00
-	dma_trans 0, OAM_BUFFER_H, OAMDATA, $0020, #$00
+	dma_trans 0, OAM_BUFFER, OAMDATA, $0200, #DMA_MODE_TO_OAM
+	dma_trans 0, OAM_BUFFER_H, OAMDATA, $0020, #DMA_MODE_TO_OAM
 	plp
 	rts		
 
@@ -144,7 +145,7 @@ Clear_VRAM:
 	stx VMAIN ; 2115
 	stz VMADDL ; 2116
 	stz VMADDH ; 2116
-	dma_trans 0, DMAZero, VMDATA_LO, $8000, #$09, 2
+	dma_trans 0, DMAZero, VMDATA_LO, $8000, DMA_MODE_TO_VRAM_2REG , 2
 	plp
 	rts
 
