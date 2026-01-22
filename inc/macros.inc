@@ -67,6 +67,54 @@
 	statePop
 .endmacro
 
+.macro dma_trans_16  p_chan, p_addr_src, p_addr_dest, p_size, p_tmode, p_count
+	stateStash
+	setAXY16
+
+	.local _dmaoff, _i, _reps
+
+	_dmaoff = (p_chan * $10)
+	
+	.ifblank p_count
+        _reps = 1
+    .else
+        _reps = p_count
+    .endif
+
+		lda p_tmode
+		sta DMAP0+_dmaoff
+		lda #<(p_addr_dest)
+		sta BBAD0+_dmaoff
+		ldx #.loword(p_addr_src)
+		stx A1T0L+_dmaoff
+		lda #^p_addr_src
+		sta A1B0+_dmaoff
+		ldx #p_size
+		stx DAS0L+_dmaoff
+	.repeat _reps, _i
+		lda #(1 << p_chan)
+		sta MDMAEN
+	.endrepeat
+
+	statePop
+.endmacro
+
+.macro wram_trans p_addr_src, p_addr_dest, p_size
+	stateStash
+	phb
+	setAXY16
+	lda #(p_size - 1)
+	ldx #.loword(p_addr_src)
+	ldy #.loword(p_addr_dest)
+	mvn  ^p_addr_dest, p_addr_src
+	;.byte  $54, ^p_addr_dest, p_addr_src
+	plb
+	statePop
+.endmacro
+
+
+
+
 
 .proc wait_vblank
 	lda HVBJOY
