@@ -4,11 +4,13 @@
 .include "macros.inc"
 .include "registers.inc"
 
+.include "res.asm"
+
+
 
 .include "header.asm"
 
 .include "variables.asm"
-
 
 .segment "CODE"
 entry:
@@ -18,11 +20,13 @@ entry_main:
 	.i16
 	phk
 	plb
+	lda #(INIDISP_FORCE_BLANK|INIDISP_BRIGHT_F)
+	sta INIDISP
+	
 	; init nmi
-	lda #(NMITIMEN_VBLANK_ON)
-	sta NMITIMEN
+	disableNMI
 	; Init DBR
-	lda #$00
+	; lda #$00
 	pha
 	plb
 	cli
@@ -37,24 +41,40 @@ main_loop_default:
 	rts
 
 init_gfx:
-	setA8
-	lda #NMITIMEN_DISABLE
-	sta NMITIMEN
-	lda #INIDISP_FORCE_BLANK
-	sta INIDISP
-
 	setAXY16
-	; graphics init stuff
+	phk
+	plb
 
-	lda #BGMODE_MODE1_2BG_TEXT
+	; Pal
+	ram_trans resSprites1Pal_size, resSprites1Pal, PAL_BUFFER
+	jsr DMA_Palette
+
+
+	; OAM
+	ram_trans 12, resSprites1Table, OAM_BUFFER
+	setA8
+	lda #$6A
+	sta OAM_BUFFER2
+	jsr DMA_OAM
+
+	setA16
+	lda #$80
+	sta VMAIN
+	ldx #$4000
+	stx VMADDL
+	dma_trans 0, resSprites1Data, VMDATAL, resSprites1Data_size, DMA_MODE_2REG_1WRITE
+
+	; stz BG12NBA
+	; lda #(BGSC_SIZE_64x32 | $20)
+	; sta BG1SC
+	lda #1
 	sta BGMODE
-	stz BG12NBA
-	lda #(BGSC_SIZE_64x32 | $20)
-	sta BG1SC
-	lda #TM_EN_BG1
+	lda #(TM_EN_OBJ)
 	sta TM
 	lda #INIDISP_ON_FULL
 	sta INIDISP
+	lda #2 ;sprite tiles at $4000
+	sta OBSEL ;= $2101
 	rts
 
 reset_gfx:
