@@ -14,7 +14,7 @@ PATH_SRC = src
 PATH_RES = res
 PATH_OUT = out
 PATH_INC = inc
-SRC = ${PATH_SRC}/main.asm 
+SRC = ${PATH_SRC}/main.asm
 CFG = ${PATH_SRC}/memmap.cfg
 OBJ = ${PATH_OUT}/main.o
 OUT = ${PATH_OUT}/main.smc
@@ -31,7 +31,7 @@ $(PATH_OUT)/res/%.chr $(PATH_OUT)/res/%.pic: $(PATH_RES)/%.png
 		-i "${PATH_OUT}/$<" \
 		-m 
 
-$(OBJ): $(SRC) $(RES:%=$(PATH_OUT)/res/%.chr) $(RES:%=$(PATH_OUT)/res/%.pal)
+$(OBJ): $(SRC) $(PATH_INC) $(RES:%=$(PATH_OUT)/res/%.chr) $(RES:%=$(PATH_OUT)/res/%.pal)
 	mkdir -p "$(PATH_OUT)"
 	$(BIN_CA65)  -o $@ -I ./inc $(SRC) -l out/main.lst --debug-info
 
