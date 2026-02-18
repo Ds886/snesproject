@@ -143,8 +143,9 @@ Clear_VRAM:
 	setXY16
 	ldx #VMAIN_INC_AFTER_HIGH
 	stx VMAIN ; 2115
-	stz VMADDL ; 2116
-	stz VMADDH ; 2116
+	ldx #$80
+	stz $2116 ;VRAM Address 
+	; stz VMADDL ; 2116
 	dma_trans 0, DMAZero, VMDATA_LO, $8000, DMA_MODE_TO_VRAM_2REG , 2
 	plp
 	rts

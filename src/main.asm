@@ -61,12 +61,9 @@ init_gfx:
 	lda #$80
 	sta VMAIN
 	ldx #$4000
-	stx VMADDL
-	dma_trans 0, resSprites1Data, VMDATAL, resSprites1Data_size, DMA_MODE_2REG_1WRITE
+	stx VMADDL ; set an address in the vram of $4000
+	dma_trans 0, resSprites1Data, VMDATAL, resSprites1Data_size, #DMA_MODE_2REG_1WRITE
 
-	; stz BG12NBA
-	; lda #(BGSC_SIZE_64x32 | $20)
-	; sta BG1SC
 	lda #1
 	sta BGMODE
 	lda #(TM_EN_OBJ)
