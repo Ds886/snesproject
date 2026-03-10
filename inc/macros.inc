@@ -91,6 +91,23 @@
 	rts
 .endproc
 
+.macro load_sprite_data p_sprite_name, p_sprite_vram_add
+	setAXY16
+	
+	; load color pallate
+	ram_trans .ident(.concat(.string(p_sprite_name), "Pal_size")), .ident(.concat(.string(p_sprite_name), "Pal")), PAL_BUFFER
+	jsr DMA_Palette
+
+	; load chr data
+	setA16
+	lda #$80
+	sta VMAIN
+	; Set vram address target
+	ldx #p_sprite_vram_add
+	stx VMADDL
+	dma_trans 0, .ident(.concat(.string(p_sprite_name), "Data")), VMDATAL, .ident(.concat(.string(p_sprite_name), "Data_size")), #DMA_MODE_2REG_1WRITE
+.endmacro
+
 
 .macro load_tile p_tile_name
 	setAXY16

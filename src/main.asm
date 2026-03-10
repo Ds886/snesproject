@@ -45,10 +45,7 @@ init_gfx:
 	phk
 	plb
 
-	; Pal
-	ram_trans resSprites1Pal_size, resSprites1Pal, PAL_BUFFER
-	jsr DMA_Palette
-
+	load_sprite_data resSprites1, $4000
 
 	; OAM
 	ram_trans 12, resSprites1Table, OAM_BUFFER
@@ -57,13 +54,7 @@ init_gfx:
 	sta OAM_BUFFER2
 	jsr DMA_OAM
 
-	setA16
-	lda #$80
-	sta VMAIN
-	ldx #$4000
-	stx VMADDL ; set an address in the vram of $4000
-	dma_trans 0, resSprites1Data, VMDATAL, resSprites1Data_size, #DMA_MODE_2REG_1WRITE
-
+	
 	lda #1
 	sta BGMODE
 	lda #(TM_EN_OBJ)

@@ -21,7 +21,7 @@ stz VTIMEH
 stz HDMAEN
 
 ;shut down screen
-lda INIDISP_FORCE_BLANK   
+lda #INIDISP_FORCE_BLANK   
 sta INIDISP
 
 ; Zero some registers used for rendering
@@ -98,9 +98,11 @@ DMA_Palette:
 	php
 	setA8
 	setXY16
-	stz CGADD ;Palette Address
 
+	stz CGADD ;Palette Address
+	; 00|00|00 -> 00
 	dma_trans 0, PAL_BUFFER, CGDATA, $0200, #DMA_MODE_TO_CGRAM
+
 	plp
 	rts
 
@@ -146,7 +148,7 @@ Clear_VRAM:
 	ldx #$80
 	stz $2116 ;VRAM Address 
 	; stz VMADDL ; 2116
-	dma_trans 0, DMAZero, VMDATA_LO, $8000, DMA_MODE_TO_VRAM_2REG , 2
+	dma_trans 0, DMAZero, VMDATA_LO, $8000, #DMA_MODE_TO_VRAM_2REG , 2
 	plp
 	rts
 
