@@ -21,7 +21,7 @@ stz VTIMEH
 stz HDMAEN
 
 ;shut down screen
-lda INIDISP_FORCE_BLANK   
+lda #INIDISP_FORCE_BLANK   
 sta INIDISP
 
 ; Zero some registers used for rendering
