@@ -33,6 +33,23 @@
 	pla
 .endmacro
 
+
+.macro ram_trans length, src_addr, dst_addr
+;mnv changes the data bank register, need to preserve it
+	phb
+.if .asize = 8
+	rep #$30
+.elseif .isize = 8
+	rep #$30
+.endif
+	lda #(length-1)
+	ldx #.loword(src_addr)
+	ldy #.loword(dst_addr)	
+;	mvn src_bank, dst_bank
+	.byte $54, ^dst_addr, ^src_addr
+	plb
+.endmacro
+
 ;.macro  dma_trans   p_addr_src p_addr_dest p_size p_tmode
 .macro dma_trans  p_chan, p_addr_src, p_addr_dest, p_size, p_tmode, p_count
 	stateStash
@@ -95,4 +112,9 @@
 	ldx #$6000
 	stx VMADDL 
 	dma_trans 0, .ident(.concat(.string(p_tile_name), "_TileData")), VMDATAL, .ident(.concat(.string(p_tile_name), "_TileData_size")), #1
+.endmacro
+
+
+.macro disableNMI
+	stz NMITIMEN
 .endmacro

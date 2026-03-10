@@ -95,7 +95,7 @@ TM_EN_BG1 = $01
 TM_EN_BG2 = $02
 TM_EN_BG3 = $04
 TM_EN_BG4 = $08
-TM_EN_BG1BJ = $10
+TM_EN_OBJ = $10
 
 TM          =   $212C   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
 
