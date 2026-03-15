@@ -2,13 +2,45 @@
 
 ; Address Bus B Registers
 
+; INIDISP - 2100
 INIDISP     =   $2100   ;   Screen Display Register   single   write   any time
+
+; Individual bits
+INIDISP_FORCE_BLANK = $80  ; Force blank ON (screen off)
+INIDISP_SCREEN_ON   = $00  ; Force blank OFF (screen on)
+
+; Brightness levels
+INIDISP_BRIGHT_0  = $00  ; Screen black
+INIDISP_BRIGHT_1  = $01
+INIDISP_BRIGHT_4  = $04
+INIDISP_BRIGHT_7  = $07
+INIDISP_BRIGHT_F  = $0F  ; Full brightness
+
+; Common settings
+INIDISP_OFF        = (INIDISP_FORCE_BLANK | INIDISP_BRIGHT_0)   ; $80
+INIDISP_ON_FULL    = (INIDISP_SCREEN_ON   | INIDISP_BRIGHT_F)   ; $0F
+INIDISP_ON_HALF    = (INIDISP_SCREEN_ON   | INIDISP_BRIGHT_7)   ; $07
+
+
+
 OBSEL       =   $2101   ;   Object Size and Character Size Register   single   write   f-blank, v-blank
 OAMADDL     =   $2102   ;   OAM Address Registers (Low)   single   write   f-blank, v-blank
 OAMADDH     =   $2103   ;   OAM Address Registers (High)   single   write   f-blank, v-blank
 OAMDATA     =   $2104   ;   OAM Data Write Register   single   write   f-blank, v-blank
+
 BGMODE      =   $2105   ;   BG Mode and Character Size Register   single   write   f-blank, v-blank, h-blank
+
+
 MOSAIC      =   $2106   ;   Mosaic Register   single   write   f-blank, v-blank, h-blank
+
+; BGSC
+
+BGSC_SIZE_32x32 = $00  ; 32×32 tiles (default)
+BGSC_SIZE_64x32 = $40  ; 64×32 tiles
+BGSC_SIZE_32x64 = $80  ; 32×64 tiles
+BGSC_SIZE_64x64 = $C0  ; 64×64 tiles
+
+
 BG1SC       =   $2107   ;   BG Tilemap Address Registers (BG1)   single   write   f-blank, v-blank
 BG2SC       =   $2108   ;   BG Tilemap Address Registers (BG2)   single   write   f-blank, v-blank
 BG3SC       =   $2109   ;   BG Tilemap Address Registers (BG3)   single   write   f-blank, v-blank
@@ -23,7 +55,18 @@ BG3HOFS     =   $2111   ;   BG Scroll Registers (BG3)   dual   write   f-blank, 
 BG3VOFS     =   $2112   ;   BG Scroll Registers (BG3)   dual   write   f-blank, v-blank, h-blank
 BG4HOFS     =   $2113   ;   BG Scroll Registers (BG4)   dual   write   f-blank, v-blank, h-blank
 BG4VOFS     =   $2114   ;   BG Scroll Registers (BG4)   dual   write   f-blank, v-blank, h-blank
+
+; VMAIN
+
+VMAIN_INC_AFTER_HIGH = $80 ; increment after high byte ($2119)
+VMAIN_INC_AFTER_LOW  = $00 ; increment after low byte ($2118)
+VMAIN_INC_1          = $00 ; increment by 1
+VMAIN_INC_32         = $01 ; increment by 32 words
+VMAIN_INC_128        = $02 ; increment by 128 words
+
 VMAIN       =   $2115   ;   Video Port Control Register   single   write   f-blank, v-blank
+
+
 VMADDL      =   $2116   ;   VRAM Address Registers (Low)   single   write   f-blank, v-blank
 VMADDH      =   $2117   ;   VRAM Address Registers (High)   single   write   f-blank, v-blank
 VMDATAL     =   $2118   ;   VRAM Data Write Registers (Low)   single   write   f-blank, v-blank
@@ -46,13 +89,86 @@ WH2         =   $2128   ;   Window Position Registers (WH2)   single   write   f
 WH3         =   $2129   ;   Window Position Registers (WH3)   single   write   f-blank, v-blank, h-blank
 WBGLOG      =   $212A   ;   Window Mask Logic registers (BG)   single   write   f-blank, v-blank, h-blank
 WOBJLOG     =   $212B   ;   Window Mask Logic registers (OBJ)   single   write   f-blank, v-blank, h-blank
+
+; TM
+TM_EN_BG1 = $01
+TM_EN_BG2 = $02
+TM_EN_BG3 = $04
+TM_EN_BG4 = $08
+TM_EN_OBJ = $10
+
 TM          =   $212C   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
+
+
+
 TS          =   $212D   ;   Screen Destination Registers   single   write   f-blank, v-blank, h-blank
 TMW         =   $212E   ;   Window Mask Destination Registers   single   write   f-blank, v-blank, h-blank
 TSW         =   $212F   ;   Window Mask Destination Registers   single   write   f-blank, v-blank, h-blank
+
+; CGWSEL
+CGWSEL_MODE_MAIN_BLACK        = $00  ; Never - main screen normal
+CGWSEL_MODE_MAIN_OUTSIDE      = $40  ; Outside window only  
+CGWSEL_MODE_MAIN_INSIDE       = $80  ; Inside window only
+CGWSEL_MODE_MAIN_ALWAYS       = $C0  ; Always
+
+; Subscreen color math enable  
+CGWSEL_MODE_SUB_BLACK         = $00  ; Never - subscreen normal
+CGWSEL_MODE_SUB_OUTSIDE       = $10  ; Outside window only
+CGWSEL_MODE_SUB_INSIDE        = $20  ; Inside window only  
+CGWSEL_MODE_SUB_ALWAYS        = $30  ; Always
+
+; Color math clip mode
+CGWSEL_MODE_CLIP_NEVER        = $00  ; Never clip colors
+CGWSEL_MODE_CLIP_OUTSIDE      = $04  ; Clip outside window
+CGWSEL_MODE_CLIP_INSIDE       = $08  ; Clip inside window
+CGWSEL_MODE_CLIP_ALWAYS       = $0C  ; Always clip colors
+
+
+
+; BGMODE
+
+
+BGMODE_MODE0_4BG_8_8 = $00  ; 4 BGs, 8x8 tiles
+BGMODE_MODE1_2BG_TEXT = $01  ; 2 BGs + optional 3rd text layer (most common)
+BGMODE_MODE2_2BG_TILEOFF = $02  ; 2 BGs with offset-per-tile
+BGMODE_MODE3_2BG_8BPP = $03  ; 2 BGs, 4/256-color
+BGMODE_MODE4_2BG_8BPP_MIXED = $04  ; 2 BGs, 4/256-color, different interleave
+BGMODE_MODE5_2BG_HIRES = $05  ; 2 BGs, hires (512px)
+BGMODE_MODE6_1BG_ = $06  ; 1 BG, hires (512px)
+BGMODE_MODE7 = $07  ; Mode 7 affine background
+
+BGMODE_BG1_8x8 = $00
+BGMODE_BG1_16x16 = $10
+BGMODE_BG2_8x8 = $00
+BGMODE_BG2_16x16 = $20
+
+
+
+
+; Prevent color math
+CGWSEL_MODE_PREVENT_NEVER     = $00  ; Never prevent color math
+CGWSEL_MODE_PREVENT_BLACK     = $02  ; Prevent math, show black
+CGWSEL_MODE_PREVENT_SUBSCREEN = $03  ; Prevent math, show subscreen
+
 CGWSEL      =   $2130   ;   Color Math Registers   single   write   f-blank, v-blank, h-blank
+
+
 CGADSUB     =   $2131   ;   Color Math Registers   single   write   f-blank, v-blank, h-blank
+
+; COLDATA
+
+; Color enable bits
+COLDATA_BLUE_EN          = $80  ; Enable blue component
+COLDATA_GREEN_EN         = $40  ; Enable green component
+COLDATA_RED_EN           = $20  ; Enable red component
+
+; Common color values
+COLDATA_BLACK            = $00  ; Black color
+COLDATA_WHITE            = $FF  ; White (all components max)
+
 COLDATA     =   $2132   ;   Color Math Registers   single   write   f-blank, v-blank, h-blank
+
+
 SETINI      =   $2133   ;   Screen Mode Select Register   single   write   f-blank, v-blank, h-blank
 MPYL        =   $2134   ;   Multiplication Result Registers   single   read   f-blank, v-blank, h-blank
 MPYM        =   $2135   ;   Multiplication Result Registers   single   read   f-blank, v-blank, h-blank
@@ -84,7 +200,19 @@ JOYSER1     =   $4017   ;   Old Style Joypad Registers   many (read)   read   an
 
 ; Internal CPU Registers
 
+; NMITIMN
+
+NMITIMEN_DISABLE       = $00  ; All interrupts off
+
+; Individual bits
+NMITIMEN_VBLANK_ON     = $80  ; Enable NMI on VBlank
+NMITIMEN_JOYPAD_ON     = $40  ; Enable automatic joypad read at VBlank
+NMITIMEN_HIRQ_ON       = $10  ; Enable H- Count IRQ
+NMITIMEN_VIRQ_ON       = $20  ; Enable V- Count IRQ
+
 NMITIMEN    =   $4200   ;   Interrupt Enable Register   single   write   any time
+
+
 WRIO        =   $4201   ;   IO Port Write Register   single   write   any time
 WRMPYA      =   $4202   ;   Multiplicand Registers   single   write   any time
 WRMPYB      =   $4203   ;   Multiplicand Registers   single   write   any time
@@ -97,7 +225,13 @@ VTIMEL      =   $4209   ;   IRQ Timer Registers (Vertical - Low)   single   writ
 VTIMEH      =   $420A   ;   IRQ Timer Registers (Vertical - High)   single   write   any time
 MDMAEN      =   $420B   ;   DMA Enable Register   single   write   any time
 HDMAEN      =   $420C   ;   HDMA Enable Register   single   write   any time
+
+; MEMSEL - rom memory type (fast / slow)
 MEMSEL      =   $420D   ;   ROM Speed Register   single   write   any time
+MEMSEL_SLOW           = $00  ; $00 - Slow ROM access (2.68MHz)
+MEMSEL_FAST           = $01  ; $01 - Fast ROM access (3.58MHz)
+
+
 RDNMI       =   $4210   ;   Interrupt Flag Registers   single   read   any time
 TIMEUP      =   $4211   ;   Interrupt Flag Registers   single   read   any time
 HVBJOY      =   $4212   ;   PPU Status Register   single   read   any time
@@ -117,6 +251,31 @@ JOY4H       =   $421F   ;   Controller Port Data Registers (Pad 4 - High)   sing
 
 
 ; DMA/HDMA Registers
+
+; DMA modes
+; Transfer modes
+DMA_MODE_1REG_1WRITE     = $00  ; 1 register, write once
+DMA_MODE_2REG_1WRITE     = $01  ; 2 registers, write once  
+DMA_MODE_1REG_2WRITE     = $02  ; 1 register, write twice
+DMA_MODE_2REG_2WRITE     = $03  ; 2 registers, write twice
+DMA_MODE_4REG_1WRITE     = $04  ; 4 registers, write once
+
+; Transfer direction
+DMA_MODE_TO_PPU          = $00  ; CPU -> PPU (normal)
+DMA_MODE_FROM_PPU        = $80  ; PPU -> CPU (read from PPU)
+
+; Address increment
+DMA_MODE_INCREMENT       = $00  ; Normal increment
+DMA_MODE_DECREMENT       = $10  ; Decrement address
+DMA_MODE_FIXED           = $08  ; Fixed address (no increment)
+
+; Common modes
+DMA_MODE_PALETTE = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_SPRITE = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_TO_OAM = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_INCREMENT)
+DMA_MODE_TO_VRAM_2REG = (DMA_MODE_2REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_TO_WRAM_1REG = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_FIXED)
+DMA_MODE_TO_CGRAM = (DMA_MODE_1REG_1WRITE | DMA_MODE_TO_PPU | DMA_MODE_INCREMENT)
 
 DMAP0       =   $4300   ;   (H)DMA Control Register
 BBAD0       =   $4301   ;   (H)DMA Destination Register

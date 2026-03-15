@@ -4,68 +4,82 @@
 .include "macros.inc"
 .include "registers.inc"
 
+.include "res.asm"
+
+
+
 .include "header.asm"
 
-.segment "BSS"
-COUNT_ANIM: .res 1
-LO_COLOR: .res 1
-HI_COLOR: .res 1
+.include "variables.asm"
 
 .segment "CODE"
-MAX_ANIM = $0C
 entry:
 	.include "init.asm"
+entry_main:
+	.a16 ; the setting from init code
+	.i16
+	phk
+	plb
+	lda #(INIDISP_FORCE_BLANK|INIDISP_BRIGHT_F)
+	sta INIDISP
+	
 	; init nmi
-	lda #$80
-	sta NMITIMEN
-	cli
+	disableNMI
 	; Init DBR
-	lda #$00
+	; lda #$00
 	pha
 	plb
+	cli
 	jsr init_vars
+	jsr init_gfx
 main_loop:
-	lda COUNT_ANIM
-	bne main_loop_default
-	lda LO_COLOR
-	clc
-	adc #12
-	sta LO_COLOR
-	lda  HI_COLOR
-	clc
-	adc #15
-	sta HI_COLOR
-	lda #MAX_ANIM
-	sta COUNT_ANIM
+	; insert alt code path here
+	nop
 main_loop_default:
-	jsr draw
 	wai
 	jmp main_loop
-
-draw:
-	lda LO_COLOR
-	sta CGDATA
-	lda HI_COLOR
-	sta CGDATA
-	lda #$0f
-	sta INIDISP
 	rts
 
+init_gfx:
+	setAXY16
+	stateStash
+
+	load_sprite_data resSprites1, $4000
+
+	; OAM
+	ram_trans 12, resSprites1Table, OAM_BUFFER
+	setA8
+	lda #$6A
+	sta OAM_BUFFER2
+	jsr DMA_OAM
+
+	
+	lda #1
+	sta BGMODE
+	lda #(TM_EN_OBJ)
+	sta TM
+	lda #INIDISP_ON_FULL
+	sta INIDISP
+	lda #2 ;sprite tiles at $4000
+	sta OBSEL ;= $2101
+	statePop
+	rts
+
+reset_gfx:
+	jsr wait_vblank
+	; jsr Clear_WRAM
+	jsr DMA_Palette
+	jsr Clear_Palette
+	jsr DMA_OAM
+	jsr Clear_VRAM
+
+	rts
 init_vars:
-	lda #MAX_ANIM
-	sta COUNT_ANIM
-	lda #$1f
-	sta LO_COLOR
-	lda #$00
-	sta HI_COLOR
 	rts
 
 h_nmi:
 	bit RDNMI
-	lda COUNT_ANIM
-	beq h_nmi_default
-	dec COUNT_ANIM
-h_nmi_default:
+	inc in_nmi
 	jmp _rti
 
 _rti:
