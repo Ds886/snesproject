@@ -42,8 +42,7 @@ main_loop_default:
 
 init_gfx:
 	setAXY16
-	phk
-	plb
+	stateStash
 
 	load_sprite_data resSprites1, $4000
 
@@ -63,6 +62,7 @@ init_gfx:
 	sta INIDISP
 	lda #2 ;sprite tiles at $4000
 	sta OBSEL ;= $2101
+	statePop
 	rts
 
 reset_gfx:
