@@ -39,7 +39,7 @@ $(OUT): $(OBJ) $(CFG)
 	$(BIN_LD65) -C $(CFG) $(OBJ) -o $(OUT) --dbgfile "./${PATH_OUT}/main.dbg"
 
 runhw:
-	./contrib/uploadandrun.sh "${OUT}" "/95 - HG/main.smc"
+	./contrib/uploadandrun.sh "${OUT}" "/main.smc"
 
 clean:
 	$(RM) -r "./${PATH_OUT}"

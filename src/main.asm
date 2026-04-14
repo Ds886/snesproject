@@ -3,6 +3,7 @@
 
 .include "macros.inc"
 .include "registers.inc"
+.include "def.asm"
 
 .include "res.asm"
 
