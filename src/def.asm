@@ -1,0 +1,5 @@
+GS_IS_JOY = 1
+GS_IS_JOY1 = 1
+; GS_IS_JOY2 = 1
+; GS_IS_JOY3 = 1
+; GS_IS_JOY4 = 1
